@@ -22,7 +22,7 @@ public class CorsConfig {
 
     public List<String> resolveAllowedOrigins() {
         List<String> origins = new ArrayList<>();
-        // Exact Vercel frontend origin
+        // Exact Vercel frontend origins
         origins.add("https://stock-flow-omega-gilt.vercel.app");
         origins.add("https://stockflow-omega-gilt.vercel.app");
         // Local development origins
@@ -72,10 +72,14 @@ public class CorsConfig {
         // Allow GET, POST, PUT, DELETE, OPTIONS, PATCH
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
-        // Allow Content-Type, Authorization and standard request headers
+        // Allow all request headers including Cache-Control, Pragma, Expires, Authorization, Content-Type
         configuration.setAllowedHeaders(Arrays.asList(
+                "*",
                 "Authorization",
                 "Content-Type",
+                "Cache-Control",
+                "Pragma",
+                "Expires",
                 "Accept",
                 "Origin",
                 "X-Requested-With",
@@ -84,7 +88,13 @@ public class CorsConfig {
         ));
 
         // Exposed headers
-        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        configuration.setExposedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type",
+                "Cache-Control",
+                "Pragma",
+                "Expires"
+        ));
 
         // Enable credentials
         configuration.setAllowCredentials(true);
@@ -98,7 +108,7 @@ public class CorsConfig {
     }
 
     /**
-     * Requirement 6: Ensure CORS configuration is applied before Spring Security.
+     * Ensure CORS configuration is applied before Spring Security.
      * Registering CorsFilter with HIGHEST_PRECEDENCE ensures the servlet container executes it
      * BEFORE Spring Security's DelegatingFilterProxy (order -100).
      */
