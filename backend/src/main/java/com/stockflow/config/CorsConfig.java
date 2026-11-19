@@ -9,44 +9,44 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 @Configuration
-public class CorsConfig implements WebMvcConfigurer {
+public class CorsConfig {
 
-    @Value("${cors.allowed-origins:https://stockflow-omega-gilt.vercel.app,http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000}")
+    @Value("${cors.allowed-origins:https://stock-flow-omega-gilt.vercel.app,https://stockflow-omega-gilt.vercel.app,http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000}")
     private String allowedOriginsConfig;
 
     public List<String> resolveAllowedOrigins() {
         List<String> origins = new ArrayList<>();
-        // Baseline allowed origins: exact production frontend + local development
+        // Exact Vercel frontend origin
+        origins.add("https://stock-flow-omega-gilt.vercel.app");
         origins.add("https://stockflow-omega-gilt.vercel.app");
+        // Local development origins
         origins.add("http://localhost:5173");
         origins.add("http://127.0.0.1:5173");
         origins.add("http://localhost:3000");
 
-        // Merge from application.properties / application-test.properties configuration
+        // Merge from property configuration if provided
         if (allowedOriginsConfig != null && !allowedOriginsConfig.isBlank()) {
             for (String raw : allowedOriginsConfig.split(",")) {
-                String trimmed = sanitizeOrigin(raw);
-                if (!trimmed.isEmpty() && !origins.contains(trimmed)) {
-                    origins.add(trimmed);
+                String sanitized = sanitizeOrigin(raw);
+                if (!sanitized.isEmpty() && !origins.contains(sanitized)) {
+                    origins.add(sanitized);
                 }
             }
         }
 
-        // Merge from System environment variable CORS_ALLOWED_ORIGINS if set in production (e.g. Render)
+        // Merge from CORS_ALLOWED_ORIGINS environment variable if set on Render
         String envOrigins = System.getenv("CORS_ALLOWED_ORIGINS");
         if (envOrigins != null && !envOrigins.isBlank()) {
             for (String raw : envOrigins.split(",")) {
-                String trimmed = sanitizeOrigin(raw);
-                if (!trimmed.isEmpty() && !origins.contains(trimmed)) {
-                    origins.add(trimmed);
+                String sanitized = sanitizeOrigin(raw);
+                if (!sanitized.isEmpty() && !origins.contains(sanitized)) {
+                    origins.add(sanitized);
                 }
             }
         }
@@ -67,13 +67,12 @@ public class CorsConfig implements WebMvcConfigurer {
         CorsConfiguration configuration = new CorsConfiguration();
 
         List<String> origins = resolveAllowedOrigins();
-        // Requirement 8: Do not use wildcard origins
         configuration.setAllowedOrigins(origins);
 
-        // Requirement 1: Allow GET, POST, PUT, DELETE and OPTIONS methods (plus PATCH)
+        // Allow GET, POST, PUT, DELETE, OPTIONS, PATCH
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
-        // Requirement 2: Allow Content-Type and Authorization headers (plus common request headers)
+        // Allow Content-Type, Authorization and standard request headers
         configuration.setAllowedHeaders(Arrays.asList(
                 "Authorization",
                 "Content-Type",
@@ -84,13 +83,13 @@ public class CorsConfig implements WebMvcConfigurer {
                 "Access-Control-Request-Headers"
         ));
 
-        // Exposed headers for client consumption
+        // Exposed headers
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
 
-        // Allow credentials
+        // Enable credentials
         configuration.setAllowCredentials(true);
 
-        // Requirement 3: Handle OPTIONS preflight requests correctly with 1 hour caching
+        // Preflight cache max age (1 hour)
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -99,8 +98,8 @@ public class CorsConfig implements WebMvcConfigurer {
     }
 
     /**
-     * Requirement 4: Ensure CORS runs before Spring Security filters.
-     * Registering CorsFilter with HIGHEST_PRECEDENCE ensures it executes in the servlet container
+     * Requirement 6: Ensure CORS configuration is applied before Spring Security.
+     * Registering CorsFilter with HIGHEST_PRECEDENCE ensures the servlet container executes it
      * BEFORE Spring Security's DelegatingFilterProxy (order -100).
      */
     @Bean
@@ -108,17 +107,5 @@ public class CorsConfig implements WebMvcConfigurer {
         FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(corsConfigurationSource));
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return bean;
-    }
-
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        List<String> origins = resolveAllowedOrigins();
-        registry.addMapping("/**")
-                .allowedOrigins(origins.toArray(new String[0]))
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
-                .allowedHeaders("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With")
-                .exposedHeaders("Authorization", "Content-Type")
-                .allowCredentials(true)
-                .maxAge(3600);
     }
 }
