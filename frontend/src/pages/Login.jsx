@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { HiOutlineCheckCircle } from 'react-icons/hi';
+import { HiOutlineCheckCircle, HiOutlineCube } from 'react-icons/hi';
 
 export default function Login() {
   const location = useLocation();
@@ -36,11 +36,24 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 px-4 py-8">
+      {/* StockFlow website branding and cube logo above card */}
+      <div className="flex flex-col items-center mb-6">
+        <div className="w-12 h-12 rounded-2xl bg-white text-blue-600 flex items-center justify-center shadow-lg mb-2.5">
+          <HiOutlineCube className="w-7 h-7" />
+        </div>
+        <span className="text-2xl font-extrabold text-white tracking-tight">
+          StockFlow
+        </span>
+        <span className="text-xs font-medium text-blue-200 uppercase tracking-wider mt-0.5">
+          SaaS Inventory Management
+        </span>
+      </div>
+
       <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-8">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
-          <p className="text-gray-500 mt-1">Sign in to your StockFlow account</p>
+          <h1 className="text-2xl font-bold text-gray-900">Sign in to StockFlow</h1>
+          <p className="text-gray-500 mt-1">Manage your inventory smarter with StockFlow</p>
         </div>
 
         {successMessage && (
