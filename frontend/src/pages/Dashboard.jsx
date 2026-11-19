@@ -75,7 +75,7 @@ export default function Dashboard() {
     return Math.max(...topProducts.map((p) => p.quantity || 0), 1);
   }, [topProducts]);
 
-  // Stock health metrics
+  // Stock health metrics calculated from actual data
   const totalProductsCount = dashboardData?.totalProducts ?? 0;
   const lowStockCount = dashboardData?.lowStockCount ?? 0;
   const healthyCount = Math.max(0, totalProductsCount - lowStockCount);
@@ -107,7 +107,7 @@ export default function Dashboard() {
     {
       title: 'Total Products',
       value: totalProductsCount,
-      subtext: `${totalProductsCount} unique SKUs cataloged`,
+      subtext: totalProductsCount === 1 ? '1 unique SKU cataloged' : `${totalProductsCount} unique SKUs cataloged`,
       icon: HiOutlineCube,
       iconBg: 'bg-blue-100 text-blue-600',
       borderAccent: 'border-l-blue-600',
@@ -123,7 +123,7 @@ export default function Dashboard() {
     {
       title: 'Low Stock Items',
       value: lowStockCount,
-      subtext: lowStockCount > 0 ? 'Requires immediate restock' : 'All items well stocked',
+      subtext: lowStockCount > 0 ? 'Requires immediate restock' : 'All items are well stocked',
       icon: HiOutlineExclamationCircle,
       iconBg: lowStockCount > 0 ? 'bg-amber-100 text-amber-600' : 'bg-emerald-100 text-emerald-600',
       badge: lowStockCount > 0 ? 'Action Needed' : 'Healthy',
@@ -142,57 +142,63 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-200">
-      {/* KPI Cards Grid */}
+      {/* 2. KPI Summary Cards Grid - Equal height, proper spacing, no text truncation */}
       <section aria-label="Dashboard Overview KPIs">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           {kpiCards.map((card) => (
             <div
               key={card.title}
-              className={`bg-white rounded-2xl p-5 sm:p-6 border border-gray-200/80 shadow-xs hover:shadow-md transition-all duration-200 border-l-4 ${card.borderAccent} flex flex-col justify-between`}
+              className={`bg-white rounded-2xl p-5 sm:p-6 border border-gray-200/80 shadow-xs hover:shadow-md transition-all duration-200 border-l-4 ${card.borderAccent} flex flex-col justify-between h-full min-h-[148px]`}
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider truncate">
+              <div>
+                {/* Card Title & Icon */}
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     {card.title}
                   </p>
-                  <p className="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-1.5 tracking-tight">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${card.iconBg} shadow-xs`}>
+                    <card.icon className="w-5 h-5 stroke-2" />
+                  </div>
+                </div>
+
+                {/* Big Number & Status Badge */}
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <p className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
                     {card.value}
                   </p>
-                </div>
-                <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${card.iconBg} shadow-xs`}>
-                  <card.icon className="w-6 h-6 stroke-2" />
+                  {card.badge && (
+                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${card.badgeColor}`}>
+                      {card.badge}
+                    </span>
+                  )}
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs">
-                <span className="text-gray-500 truncate">{card.subtext}</span>
-                {card.badge && (
-                  <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border ${card.badgeColor}`}>
-                    {card.badge}
-                  </span>
-                )}
+              {/* Description without truncation */}
+              <div className="mt-3 pt-3 border-t border-gray-100 text-xs text-gray-500 leading-normal">
+                {card.subtext}
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Inventory Overview & Analytics Section */}
+      {/* 3 & 4. Inventory Overview & Analytics Section */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Stock Health Card */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-200/80 shadow-xs flex flex-col justify-between">
+        {/* 4. Inventory Health Card */}
+        <div className="bg-white rounded-2xl p-6 border border-gray-200/80 shadow-xs flex flex-col justify-between h-full">
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 gap-2">
               <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                <HiOutlineShieldCheck className="w-5 h-5 text-blue-600" />
+                <HiOutlineShieldCheck className="w-5 h-5 text-blue-600 flex-shrink-0" />
                 <span>Inventory Health</span>
               </h2>
-              <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+              <span className={`px-2.5 py-1 rounded-full text-xs font-bold border shrink-0 ${
                 healthPercent >= 90
-                  ? 'bg-emerald-50 text-emerald-700'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                   : healthPercent >= 70
-                  ? 'bg-amber-50 text-amber-700'
-                  : 'bg-red-50 text-red-700'
+                  ? 'bg-amber-50 text-amber-700 border-amber-200'
+                  : 'bg-red-50 text-red-700 border-red-200'
               }`}>
                 {healthPercent}% Optimal
               </span>
@@ -204,23 +210,23 @@ export default function Dashboard() {
                 <div
                   className="bg-emerald-500 h-full transition-all duration-500"
                   style={{ width: `${healthPercent}%` }}
-                  title={`Healthy: ${healthyCount} products`}
+                  title={`Healthy: ${healthyCount} ${healthyCount === 1 ? 'product' : 'products'}`}
                 />
                 <div
                   className="bg-amber-500 h-full transition-all duration-500"
                   style={{ width: `${100 - healthPercent}%` }}
-                  title={`Low Stock: ${lowStockCount} products`}
+                  title={`Low Stock: ${lowStockCount} ${lowStockCount === 1 ? 'product' : 'products'}`}
                 />
               </div>
 
-              <div className="flex items-center justify-between text-xs text-gray-500 pt-1">
+              <div className="flex items-center justify-between text-xs text-gray-600 pt-1">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                  <span>Healthy ({healthyCount})</span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0" />
+                  <span>Healthy ({healthyCount} {healthyCount === 1 ? 'item' : 'items'})</span>
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                  <span>Low Stock ({lowStockCount})</span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0" />
+                  <span>Low Stock ({lowStockCount} {lowStockCount === 1 ? 'item' : 'items'})</span>
                 </span>
               </div>
             </div>
@@ -228,11 +234,11 @@ export default function Dashboard() {
             {/* Metric Highlights */}
             <div className="grid grid-cols-2 gap-3 mt-6 pt-6 border-t border-gray-100">
               <div className="p-3 bg-gray-50/80 rounded-xl">
-                <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">In-Stock Rate</span>
+                <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">In-Stock Rate</span>
                 <p className="text-xl font-bold text-gray-900 mt-0.5">{healthPercent}%</p>
               </div>
               <div className="p-3 bg-gray-50/80 rounded-xl">
-                <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Low Stock Ratio</span>
+                <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Low Stock Ratio</span>
                 <p className={`text-xl font-bold mt-0.5 ${lowStockCount > 0 ? 'text-amber-600' : 'text-gray-900'}`}>
                   {totalProductsCount > 0 ? `${Math.round((lowStockCount / totalProductsCount) * 100)}%` : '0%'}
                 </p>
@@ -251,49 +257,55 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Stock Distribution Chart */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-200/80 shadow-xs lg:col-span-2 flex flex-col justify-between">
+        {/* 3. Stock Distribution Chart */}
+        <div className="bg-white rounded-2xl p-6 border border-gray-200/80 shadow-xs lg:col-span-2 flex flex-col justify-between h-full">
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 gap-2">
               <div>
                 <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                  <HiOutlineTrendingUp className="w-5 h-5 text-indigo-600" />
+                  <HiOutlineTrendingUp className="w-5 h-5 text-indigo-600 flex-shrink-0" />
                   <span>Stock Distribution</span>
                 </h2>
                 <p className="text-xs text-gray-500 mt-0.5">Top products by inventory volume</p>
               </div>
-              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                {productsList.length} Total SKUs
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider shrink-0 bg-gray-100 px-2.5 py-1 rounded-lg">
+                {productsList.length} {productsList.length === 1 ? 'SKU' : 'Total SKUs'}
               </span>
             </div>
 
-            {/* Responsive Distribution Bars */}
+            {/* Responsive Distribution Bars with Dynamic Grammar */}
             {topProducts.length > 0 ? (
               <div className="space-y-4 mt-5">
                 {topProducts.map((p) => {
-                  const percentage = Math.round(((p.quantity || 0) / maxProductQty) * 100);
+                  const qty = p.quantity || 0;
+                  const unitLabel = qty === 1 ? 'unit' : 'units';
+                  const percentage = Math.round((qty / maxProductQty) * 100);
                   const isLow = p.lowStock || false;
 
                   return (
                     <div key={p.id} className="group">
-                      <div className="flex items-center justify-between text-xs sm:text-sm font-medium mb-1.5">
-                        <div className="flex items-center gap-2 min-w-0 pr-4">
-                          <span className="text-gray-900 font-semibold truncate">{p.name}</span>
-                          <span className="px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-500 text-[11px] font-mono shrink-0">
+                      <div className="flex items-center justify-between text-xs sm:text-sm font-medium mb-1.5 gap-2">
+                        <div className="flex items-center gap-2 min-w-0 pr-2">
+                          <span className="text-gray-900 font-semibold truncate" title={p.name}>
+                            {p.name}
+                          </span>
+                          <span className="px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-600 font-mono text-[11px] font-medium shrink-0">
                             {p.sku}
                           </span>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="font-bold text-gray-900">{(p.quantity || 0).toLocaleString()} units</span>
+                          <span className="font-bold text-gray-900 tabular-nums">
+                            {qty.toLocaleString()} {unitLabel}
+                          </span>
                           {isLow && (
-                            <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-700">
+                            <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800">
                               Low
                             </span>
                           )}
                         </div>
                       </div>
 
-                      {/* Bar Track */}
+                      {/* Bar Track using actual quantity percentage */}
                       <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-500 ${
@@ -301,7 +313,7 @@ export default function Dashboard() {
                               ? 'bg-gradient-to-r from-amber-400 to-amber-500'
                               : 'bg-gradient-to-r from-blue-500 to-indigo-600'
                           }`}
-                          style={{ width: `${Math.max(percentage, 4)}%` }}
+                          style={{ width: `${Math.max(percentage, qty > 0 ? 5 : 0)}%` }}
                         />
                       </div>
                     </div>
@@ -311,7 +323,7 @@ export default function Dashboard() {
             ) : (
               <div className="py-12 text-center text-gray-400">
                 <HiOutlineCube className="w-10 h-10 mx-auto text-gray-300 mb-2" />
-                <p className="text-sm font-medium text-gray-500">No product inventory yet</p>
+                <p className="text-sm font-medium text-gray-600">No product inventory yet</p>
                 <p className="text-xs text-gray-400 mt-1">Add products to visualize your inventory distribution</p>
               </div>
             )}
@@ -330,37 +342,37 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* Low Stock Alerts & Products Table */}
+      {/* 5. Low Stock Products Section */}
       <section className="bg-white rounded-2xl border border-gray-200/80 shadow-xs overflow-hidden">
-        <div className="p-5 sm:p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-                <HiOutlineExclamationCircle className="w-5 h-5 stroke-2" />
-              </div>
-              <h2 className="text-lg font-bold text-gray-900 tracking-tight">Low Stock Products</h2>
-              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                lowStockCount > 0
-                  ? 'bg-amber-100 text-amber-800'
-                  : 'bg-emerald-100 text-emerald-800'
-              }`}>
-                {lowStockCount} {lowStockCount === 1 ? 'item' : 'items'}
-              </span>
+        <div className="p-5 sm:p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0 shadow-xs">
+              <HiOutlineExclamationCircle className="w-5 h-5 stroke-2" />
             </div>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1">
-              Products with available quantity at or below their effective threshold
-            </p>
+            <div>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h2 className="text-lg font-bold text-gray-900 tracking-tight">Low Stock Products</h2>
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+                  lowStockCount > 0
+                    ? 'bg-amber-50 text-amber-800 border-amber-200'
+                    : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                }`}>
+                  {lowStockCount} {lowStockCount === 1 ? 'item' : 'items'}
+                </span>
+              </div>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Products with available quantity at or below their effective threshold
+              </p>
+            </div>
           </div>
 
-          {lowStockCount > 0 && (
-            <Link
-              to="/products"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg transition-colors self-start sm:self-auto"
-            >
-              <span>Manage Inventory</span>
-              <HiOutlineArrowNarrowRight className="w-3.5 h-3.5" />
-            </Link>
-          )}
+          <Link
+            to="/products"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-gray-700 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-xl transition-all self-start sm:self-auto shrink-0"
+          >
+            <span>Manage Inventory</span>
+            <HiOutlineArrowNarrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
 
         {/* Table or Empty State */}
@@ -373,7 +385,7 @@ export default function Dashboard() {
                   <th scope="col" className="px-4 py-3.5">SKU</th>
                   <th scope="col" className="px-4 py-3.5">Stock Level</th>
                   <th scope="col" className="px-4 py-3.5">Available Qty</th>
-                  <th scope="col" className="px-4 py-3.5">Low-Stock Threshold</th>
+                  <th scope="col" className="px-4 py-3.5">Threshold</th>
                   <th scope="col" className="px-4 py-3.5">Status</th>
                   <th scope="col" className="px-5 py-3.5 sm:px-6 text-right">Action</th>
                 </tr>
@@ -381,12 +393,13 @@ export default function Dashboard() {
               <tbody className="divide-y divide-gray-100">
                 {dashboardData.lowStockProducts.map((product) => {
                   const effectiveThresh = product.lowStockThreshold ?? 10;
-                  const ratio = Math.min(100, Math.round(((product.quantity || 0) / (effectiveThresh || 1)) * 100));
+                  const qty = product.quantity || 0;
+                  const ratio = Math.min(100, Math.round((qty / (effectiveThresh || 1)) * 100));
 
                   return (
                     <tr
                       key={product.id}
-                      className="hover:bg-amber-50/30 transition-colors group"
+                      className="hover:bg-amber-50/40 transition-colors group"
                     >
                       {/* Product Name */}
                       <td className="px-5 py-4 sm:px-6">
@@ -411,14 +424,14 @@ export default function Dashboard() {
                           <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
                             <div
                               className={`h-full rounded-full ${
-                                product.quantity === 0
+                                qty === 0
                                   ? 'bg-red-500'
                                   : 'bg-amber-500'
                               }`}
-                              style={{ width: `${Math.max(ratio, 8)}%` }}
+                              style={{ width: `${Math.max(ratio, qty > 0 ? 8 : 0)}%` }}
                             />
                           </div>
-                          <span className="text-[11px] font-bold text-gray-500 w-8 text-right">
+                          <span className="text-[11px] font-bold text-gray-500 w-8 text-right tabular-nums">
                             {ratio}%
                           </span>
                         </div>
@@ -427,17 +440,17 @@ export default function Dashboard() {
                       {/* Available Qty */}
                       <td className="px-4 py-4">
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold ${
-                          product.quantity === 0
+                          qty === 0
                             ? 'bg-red-100 text-red-800'
                             : 'bg-amber-100 text-amber-800'
                         }`}>
-                          {product.quantity} {product.quantity === 1 ? 'unit' : 'units'}
+                          {qty} {qty === 1 ? 'unit' : 'units'}
                         </span>
                       </td>
 
                       {/* Threshold */}
-                      <td className="px-4 py-4 text-xs font-medium text-gray-600">
-                        {effectiveThresh} units
+                      <td className="px-4 py-4 text-xs font-semibold text-gray-700">
+                        {effectiveThresh} {effectiveThresh === 1 ? 'unit' : 'units'}
                       </td>
 
                       {/* Status */}
@@ -475,7 +488,7 @@ export default function Dashboard() {
               All inventory levels are healthy!
             </h3>
             <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto mt-1.5 leading-relaxed">
-              No products are currently at or below their low-stock threshold. Your inventory buffer is in good standing.
+              No products are currently at or below their low-stock threshold. Your inventory buffer is in optimal standing.
             </p>
             <div className="mt-5">
               <Link
