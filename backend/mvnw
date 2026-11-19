@@ -1,0 +1,57 @@
+#!/bin/sh
+# ----------------------------------------------------------------------------
+# Maven Wrapper Shell Script
+# ----------------------------------------------------------------------------
+
+WRAPPER_VERSION="3.2.0"
+
+# Resolve directories
+PRG="$0"
+while [ -h "$PRG" ] ; do
+  ls=`ls -ld "$PRG"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    PRG="$link"
+  else
+    PRG=`dirname "$PRG"`/"$link"
+  fi
+done
+SAVED="`pwd`"
+cd "`dirname \"$PRG\"`" >/dev/null
+APP_HOME="`pwd -P`"
+cd "$SAVED" >/dev/null
+
+# Read wrapper properties
+WRAPPER_PROPERTIES="$APP_HOME/.mvn/wrapper/maven-wrapper.properties"
+DISTRIBUTION_URL=$(grep -e "^distributionUrl=" "$WRAPPER_PROPERTIES" | cut -d= -f2-)
+
+if [ -z "$DISTRIBUTION_URL" ]; then
+  echo "Distribution URL not found in $WRAPPER_PROPERTIES" >&2
+  exit 1
+fi
+
+# Target dir
+DIST_NAME=$(basename "$DISTRIBUTION_URL" -bin.zip)
+MVN_HOME="$HOME/.m2/wrapper/dists/$DIST_NAME"
+
+if [ ! -d "$MVN_HOME" ]; then
+  echo "Downloading Maven from $DISTRIBUTION_URL ..."
+  TMP_DIR=$(mktemp -d)
+  TMP_FILE="$TMP_DIR/maven.zip"
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL -o "$TMP_FILE" "$DISTRIBUTION_URL"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -q -O "$TMP_FILE" "$DISTRIBUTION_URL"
+  else
+    echo "Neither curl nor wget found." >&2
+    exit 1
+  fi
+
+  mkdir -p "$MVN_HOME"
+  unzip -q "$TMP_FILE" -d "$TMP_DIR"
+  EXTRACTED_DIR=$(find "$TMP_DIR" -maxdepth 1 -mindepth 1 -type d -name "apache-maven*")
+  mv "$EXTRACTED_DIR"/* "$MVN_HOME"/
+  rm -rf "$TMP_DIR"
+fi
+
+exec "$MVN_HOME/bin/mvn" "$@"
