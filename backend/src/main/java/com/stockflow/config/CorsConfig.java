@@ -22,10 +22,10 @@ public class CorsConfig {
 
     public List<String> resolveAllowedOrigins() {
         List<String> origins = new ArrayList<>();
-        // Exact Vercel frontend origins
+        // 1. Exact Vercel frontend origins
         origins.add("https://stock-flow-omega-gilt.vercel.app");
         origins.add("https://stockflow-omega-gilt.vercel.app");
-        // Local development origins
+        // 2. Local development origins
         origins.add("http://localhost:5173");
         origins.add("http://127.0.0.1:5173");
         origins.add("http://localhost:3000");
@@ -69,26 +69,15 @@ public class CorsConfig {
         List<String> origins = resolveAllowedOrigins();
         configuration.setAllowedOrigins(origins);
 
-        // Allow GET, POST, PUT, DELETE, OPTIONS, PATCH
+        // 4. Allow GET, POST, PUT, DELETE, OPTIONS, PATCH
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
-        // Allow all request headers including Cache-Control, Pragma, Expires, Authorization, Content-Type
-        configuration.setAllowedHeaders(Arrays.asList(
-                "*",
-                "Authorization",
-                "Content-Type",
-                "Cache-Control",
-                "Pragma",
-                "Expires",
-                "Accept",
-                "Origin",
-                "X-Requested-With",
-                "Access-Control-Request-Method",
-                "Access-Control-Request-Headers"
-        ));
+        // 2 & 3. Prefer allowedHeaders("*") to allow all request headers (Content-Type, Authorization, Cache-Control, Pragma, Accept, etc.)
+        configuration.setAllowedHeaders(List.of("*"));
 
-        // Exposed headers
+        // Exposed headers for client access
         configuration.setExposedHeaders(Arrays.asList(
+                "*",
                 "Authorization",
                 "Content-Type",
                 "Cache-Control",
@@ -96,10 +85,10 @@ public class CorsConfig {
                 "Expires"
         ));
 
-        // Enable credentials
+        // Enable credentials (compatible with explicit origins and wildcard headers)
         configuration.setAllowCredentials(true);
 
-        // Preflight cache max age (1 hour)
+        // 5. Preflight cache max age (1 hour)
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -108,7 +97,7 @@ public class CorsConfig {
     }
 
     /**
-     * Ensure CORS configuration is applied before Spring Security.
+     * 6. Ensure CORS processing happens before Spring Security.
      * Registering CorsFilter with HIGHEST_PRECEDENCE ensures the servlet container executes it
      * BEFORE Spring Security's DelegatingFilterProxy (order -100).
      */
@@ -116,6 +105,7 @@ public class CorsConfig {
     public FilterRegistrationBean<CorsFilter> corsFilterRegistrationBean(CorsConfigurationSource corsConfigurationSource) {
         FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(corsConfigurationSource));
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        bean.addUrlPatterns("/*");
         return bean;
     }
 }
