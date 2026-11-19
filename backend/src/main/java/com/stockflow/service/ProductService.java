@@ -30,6 +30,7 @@ public class ProductService {
         this.settingsRepository = settingsRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ProductResponse> getAllProducts(Long organizationId) {
         int defaultThreshold = getDefaultThreshold(organizationId);
         return productRepository.findAllByOrganizationId(organizationId)
@@ -38,6 +39,7 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public ProductResponse getProductById(Long id, Long organizationId) {
         int defaultThreshold = getDefaultThreshold(organizationId);
         Product product = productRepository.findByIdAndOrganizationId(id, organizationId)
@@ -96,6 +98,7 @@ public class ProductService {
         productRepository.delete(product);
     }
 
+    @Transactional(readOnly = true)
     public List<ProductResponse> searchProducts(Long organizationId, String query) {
         int defaultThreshold = getDefaultThreshold(organizationId);
         return productRepository.searchByNameOrSku(organizationId, query)

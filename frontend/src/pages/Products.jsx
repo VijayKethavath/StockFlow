@@ -65,101 +65,111 @@ export default function Products() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Products</h1>
+    <div className="space-y-6 animate-in fade-in duration-200">
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">Product Catalog</h2>
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+            Manage your inventory items, pricing and stock alerts
+          </p>
+        </div>
         <Link
           to="/products/new"
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold rounded-xl shadow-xs transition-colors self-start sm:self-auto"
         >
-          <HiOutlinePlus className="w-5 h-5" />
-          Add Product
+          <HiOutlinePlus className="w-4 h-4 stroke-2" />
+          <span>Add New Product</span>
         </Link>
       </div>
 
-      {/* Search */}
-      <div className="relative mb-6">
-        <HiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+      {/* Search Input */}
+      <div className="relative">
+        <HiOutlineSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search products by name or SKU..."
-          className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+          placeholder="Search products by title or SKU..."
+          className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200/90 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-2xs"
         />
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">
+        <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl">
           {error}
         </div>
       )}
 
-      {/* Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      {/* Table Card */}
+      <div className="bg-white rounded-2xl shadow-xs border border-gray-200/80 overflow-hidden">
         {products.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    SKU
-                  </th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Quantity
-                  </th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Cost
-                  </th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Selling
-                  </th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
+                <tr className="border-b border-gray-200 bg-gray-50/75 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-5 py-3.5 sm:px-6">Product Details</th>
+                  <th scope="col" className="px-4 py-3.5">SKU</th>
+                  <th scope="col" className="px-4 py-3.5">In Stock</th>
+                  <th scope="col" className="px-4 py-3.5">Cost Price</th>
+                  <th scope="col" className="px-4 py-3.5">Selling Price</th>
+                  <th scope="col" className="px-4 py-3.5">Status</th>
+                  <th scope="col" className="px-5 py-3.5 sm:px-6 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-100">
                 {products.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{product.name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{product.sku}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{product.quantity}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{formatPrice(product.costPrice)}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{formatPrice(product.sellingPrice)}</td>
-                    <td className="px-6 py-4">
+                  <tr key={product.id} className="hover:bg-gray-50/80 transition-colors group">
+                    <td className="px-5 py-4 sm:px-6">
+                      <div className="font-semibold text-gray-900 text-sm">{product.name}</div>
+                      {product.description && (
+                        <div className="text-xs text-gray-400 truncate max-w-xs mt-0.5">
+                          {product.description}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className="inline-flex px-2 py-0.5 rounded-md bg-gray-100 text-gray-700 font-mono text-xs font-medium">
+                        {product.sku}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 font-bold text-gray-900 text-sm">
+                      {product.quantity}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-600 font-medium">
+                      {formatPrice(product.costPrice)}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-900 font-semibold">
+                      {formatPrice(product.sellingPrice)}
+                    </td>
+                    <td className="px-4 py-4">
                       {product.lowStock ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                          Low Stock
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                          <span>Low Stock</span>
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                           In Stock
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="px-5 py-4 sm:px-6 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
                         <Link
                           to={`/products/${product.id}/edit`}
-                          className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-                          title="Edit"
+                          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Edit Product"
                         >
-                          <HiOutlinePencil className="w-5 h-5" />
+                          <HiOutlinePencil className="w-4 h-4" />
                         </Link>
                         <button
+                          type="button"
                           onClick={() => setDeleteTarget(product)}
-                          className="p-2 text-gray-400 hover:text-red-600 transition-colors"
-                          title="Delete"
+                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Delete Product"
                         >
-                          <HiOutlineTrash className="w-5 h-5" />
+                          <HiOutlineTrash className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -169,30 +179,34 @@ export default function Products() {
             </table>
           </div>
         ) : (
-          <div className="px-6 py-12 text-center">
-            <HiOutlineCube className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500 font-medium">
-              {search ? 'No products found' : 'No products yet'}
+          <div className="py-14 px-4 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center mx-auto mb-3">
+              <HiOutlineCube className="w-7 h-7" />
+            </div>
+            <p className="text-base font-bold text-gray-800">
+              {search ? 'No matching products' : 'No products in catalog'}
             </p>
-            <p className="text-gray-400 text-sm mt-1">
+            <p className="text-xs sm:text-sm text-gray-500 max-w-sm mx-auto mt-1">
               {search
-                ? 'Try adjusting your search terms'
-                : 'Add your first product to get started'}
+                ? 'Try adjusting your search terms or SKU.'
+                : 'Get started by creating your first product item.'}
             </p>
             {!search && (
-              <Link
-                to="/products/new"
-                className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <HiOutlinePlus className="w-4 h-4" />
-                Add Product
-              </Link>
+              <div className="mt-5">
+                <Link
+                  to="/products/new"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition-colors"
+                >
+                  <HiOutlinePlus className="w-4 h-4" />
+                  <span>Add First Product</span>
+                </Link>
+              </div>
             )}
           </div>
         )}
       </div>
 
-      {/* Delete Modal */}
+      {/* Delete Confirmation Modal */}
       {deleteTarget && (
         <DeleteModal
           product={deleteTarget}

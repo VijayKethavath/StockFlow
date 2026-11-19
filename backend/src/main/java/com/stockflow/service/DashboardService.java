@@ -7,6 +7,7 @@ import com.stockflow.entity.Product;
 import com.stockflow.repository.OrganizationSettingsRepository;
 import com.stockflow.repository.ProductRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +24,7 @@ public class DashboardService {
         this.settingsRepository = settingsRepository;
     }
 
+    @Transactional(readOnly = true)
     public DashboardResponse getDashboard(Long organizationId) {
         long totalProducts = productRepository.countByOrganizationId(organizationId);
         long totalStockQuantity = productRepository.sumQuantityByOrganizationId(organizationId);
@@ -52,7 +54,7 @@ public class DashboardService {
                             p.getQuantity(),
                             p.getCostPrice(),
                             p.getSellingPrice(),
-                            p.getLowStockThreshold(),
+                            effectiveThreshold,
                             true,
                             p.getCreatedAt(),
                             p.getUpdatedAt()

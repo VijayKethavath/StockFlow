@@ -36,7 +36,12 @@ export default function Signup() {
 
     try {
       await signup({ email, password, confirmPassword, organizationName });
-      navigate('/dashboard');
+      navigate('/login', {
+        state: {
+          message: 'Registration successful! Please log in with your credentials.',
+          email,
+        },
+      });
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create account');
     } finally {

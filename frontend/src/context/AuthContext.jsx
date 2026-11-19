@@ -27,11 +27,12 @@ export function AuthProvider({ children }) {
 
   const signup = async (data) => {
     const response = await signupApi(data);
-    const { token: newToken, ...userData } = response.data;
-    setToken(newToken);
-    setUser(userData);
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(userData));
+    // Do not automatically log in the user upon registration.
+    // Ensure all auth tokens and session state are cleared.
+    setToken(null);
+    setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     return response;
   };
 
